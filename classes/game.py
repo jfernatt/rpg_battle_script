@@ -40,8 +40,8 @@ class Person:
     def generate_spell_damage(self, i):
         mgl = self.magic[i]['dmg'] - 5
         mgh = self.magic[i]['dmg'] + 5
-        covalescence = random.randrange(mgl, mgh)
-        self.restore_health(covalescence)
+        convalescence = random.randrange(mgl, mgh)
+        self.restore_health(convalescence)
 
     def restore_health(self, covalescence):
         return
