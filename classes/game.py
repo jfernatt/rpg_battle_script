@@ -1,5 +1,6 @@
 import random
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -10,8 +11,10 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-class Person():
-    def __init__(self, hp, mp, atk, df, magic):
+
+class Person:
+    def __init__(self, hp, mp, atk, df, magic, targets=None, name='Entity'):
+        self.name = name
         self.max_hp = hp
         self.hp = hp
         self.max_mp = mp
@@ -20,15 +23,28 @@ class Person():
         self.atkh = atk + 10
         self.df = df
         self.magic = magic
-        self.actions = ['Attack', 'Magic']
+        self.targets = targets
+        self.current_target = None
+        self.actions = [{'name' : 'Attack', 'function' : self.generate_damage},
+                        {'name' : 'Magic', 'function' : self.choose_magic},
+                        {'name' : 'Change Target', 'function' : self.change_target},
+                        {'name' : 'Run Away!', 'function' : self.flee}]
 
     def generate_damage(self):
-        return random.randrange(self.atkl, self.atkh)
+        if not self.current_target:
+            self.change_target()
+        damage = random.randrange(self.atkl, self.atkh)
+        self.current_target.take_damage(damage)
+
 
     def generate_spell_damage(self, i):
         mgl = self.magic[i]['dmg'] - 5
         mgh = self.magic[i]['dmg'] + 5
-        return random.randrange(mgl, mgh)
+        covalescence = random.randrange(mgl, mgh)
+        self.restore_health(covalescence)
+
+    def restore_health(self, covalescence):
+        return
 
     def take_damage(self, dmg):
         self.hp -= dmg
@@ -39,15 +55,67 @@ class Person():
     def reduce_mp(self, cost):
         self.mp -= cost
 
-    def choose_action(self):
-        i = 1
-        for item in self.actions:
-            print(f'{i} : {item}')
-            i += 1
+    def choose_action(self, selection=None):
+        options = {}
+        [options.update({i+1 : {'name' : k['name'], 'function' : k['function']}}) for i, k in enumerate(self.actions)]
+        if selection:
+            try:
+                return options[selection]
+            except Exception as e:
+                print(e)
+                quit()
+        else:
+            [print(f'{i}. {k["name"]}') for i, k in options.items()]
+            try:
+                selection = int(input("Choose an action: "))
+                print(options[selection])
+            except Exception as e:
+                #log e
+                error = e
+                print('Invalid Selection, please try again...\n')
+                self.choose_action()
+            else:
+                return options[selection]
+
+    def change_target(self):
+        if len(self.targets) >= 1:
+            options = {}
+            [options.update({i + 1: {'name': k.name, 'hp' : k.hp, 'object' : k}}) for i, k in enumerate(self.targets)]
+            [print(f'{i}. {k["name"]} - HP: {k["hp"]}') for i, k in options.items()]
+            try:
+                selection = int(input("Choose a target: "))
+                print(options[selection])
+            except Exception as e:
+                # log e
+                error = e
+                print('Invalid Selection, please try again...\n')
+                self.change_target()
+            else:
+                self.current_target = options[selection]['object']
+                self.choose_action()
+        else:
+            print('No other targets available')
+
+    def flee(self):
+        flee = random.randint(0,1)
+        if flee:
+            #Stop Combat
+            quit()
+        else:
+            print(f'{bcolors.FAIL}{bcolors.BOLD}You were unable to flee from combat{bcolors.ENDC}')
+
 
     def choose_magic(self):
-        i = 1
-        print("Magic")
-        for spell in self.magic:
-            print(f'{i} : {spell["name"]}, cost {spell["cost"]}mp')
-            i += 1
+        options = {}
+        [options.update({i+1 : {'name' : k['name'], 'cost' : k['cost'], 'dmg' : k['dmg']}}) for i, k in enumerate(self.magic)]
+        [print(f'{i}. {k["name"]}') for i, k in options.items()]
+        try:
+            selection = int(input("Choose a spell: "))
+            print(options[selection])
+        except Exception as e:
+            # log e
+            error = e
+            print('Invalid Selection, please try again...\n')
+            self.choose_magic()
+        else:
+            return options[selection]
