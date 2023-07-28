@@ -20,11 +20,11 @@ def main():
     while running:
         print('=' * 72)
         choice = player.choose_action()
-        print(f'Player chooses {choice["name"]}')
+        print(f'Player chooses {choice["name"]}\n')
         choice['function']()
 
         echoice = enemy.choose_action(1)
-        print(f'Entity chooses {echoice["name"]}')
+        print(f'Entity chooses {echoice["name"]}\n')
 
         if enemy.hp < 1:
             print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')

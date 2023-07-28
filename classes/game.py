@@ -32,21 +32,35 @@ class Person:
 
     def generate_damage(self):
         if not self.current_target:
-            self.change_target()
+            self.change_target(free_action=False)
         damage = random.randrange(self.atkl, self.atkh)
         self.current_target.take_damage(damage)
 
+    def cast_spell(self, spell):
+        if self.mp >= spell['cost']:
+            if not self.current_target:
+                self.change_target(free_action=False)
+            else:
+                self.generate_spell_damage(spell)
+                self.mp -= spell['cost']
 
-    def generate_spell_damage(self, i):
-        mgl = self.magic[i]['dmg'] - 5
-        mgh = self.magic[i]['dmg'] + 5
+    def generate_spell_damage(self, spell):
+        mgl = spell['dmg'] - 5
+        mgh = spell['dmg'] + 5
+        damage = random.randrange(mgl, mgh)
+        self.current_target.take_damage(damage)
+
+    def restore_health(self, spell):
+        mgl = spell['dmg'] - 5
+        mgh = spell['dmg'] + 5
         convalescence = random.randrange(mgl, mgh)
-        self.restore_health(convalescence)
-
-    def restore_health(self, covalescence):
-        return
+        if self.hp + convalescence > self.max_hp:
+            self.hp = self.max_hp
+        else:
+            self.hp += convalescence
 
     def take_damage(self, dmg):
+        print(f'{self.name} takes {dmg} points of damage...')
         self.hp -= dmg
         if self.hp < 1:
             self.hp = 0
@@ -68,42 +82,38 @@ class Person:
             [print(f'{i}. {k["name"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose an action: "))
-                print(options[selection])
             except Exception as e:
                 #log e
-                error = e
                 print('Invalid Selection, please try again...\n')
                 self.choose_action()
             else:
                 return options[selection]
 
-    def change_target(self):
+    def change_target(self, free_action=True):
         if len(self.targets) >= 1:
             options = {}
             [options.update({i + 1: {'name': k.name, 'hp' : k.hp, 'object' : k}}) for i, k in enumerate(self.targets)]
             [print(f'{i}. {k["name"]} - HP: {k["hp"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose a target: "))
-                print(options[selection])
             except Exception as e:
                 # log e
-                error = e
                 print('Invalid Selection, please try again...\n')
-                self.change_target()
+                self.change_target(free_action=free_action)
             else:
                 self.current_target = options[selection]['object']
-                self.choose_action()
+                if free_action:
+                    self.choose_action()
         else:
             print('No other targets available')
 
     def flee(self):
-        flee = random.randint(0,1)
+        flee = random.randint(0, 1)
         if flee:
             #Stop Combat
             quit()
         else:
             print(f'{bcolors.FAIL}{bcolors.BOLD}You were unable to flee from combat{bcolors.ENDC}')
-
 
     def choose_magic(self):
         options = {}
@@ -111,11 +121,9 @@ class Person:
         [print(f'{i}. {k["name"]}') for i, k in options.items()]
         try:
             selection = int(input("Choose a spell: "))
-            print(options[selection])
         except Exception as e:
             # log e
-            error = e
             print('Invalid Selection, please try again...\n')
             self.choose_magic()
         else:
-            return options[selection]
+            self.cast_spell(options[selection])
