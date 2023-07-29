@@ -38,9 +38,9 @@ class Person:
 
     def cast_spell(self, spell):
         self.change_target()
-        if self.mp >= spell['cost']:
-            spell.generate_spell_damage(spell, self.current_target)
-            self.mp -= spell['cost']
+        if self.mp >= spell.cost:
+            spell.generate_spell_damage(self.current_target)
+            self.mp -= spell.cost
         else:
             print(f'{bcolors.FAIL}Not enough magic points!{bcolors.ENDC}')
             self.choose_action()
@@ -117,14 +117,13 @@ class Person:
 
     def choose_magic(self):
         options = {}
-        [options.update({i+1 : {'name' : k.name, 'cost' : k.cost, 'dmg' : k.dmg}}) for i, k in enumerate(self.magic)]
+        [options.update({i+1 : {'name' : k.name, 'cost' : k.cost, 'dmg' : k.dmg, 'object' : k}}) for i, k in enumerate(self.magic)]
         print(f'Current MP: {self.mp}')
         [print(f'{i}. {k["name"]}, MP: {k["cost"]}') for i, k in options.items()]
         try:
             selection = int(input("Choose a spell: "))
+            self.cast_spell(options[selection]['object'])
         except Exception as e:
             # log e
             print('Invalid Selection, please try again...\n')
             self.choose_magic()
-        else:
-            self.cast_spell(options[selection])

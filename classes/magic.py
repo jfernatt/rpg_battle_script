@@ -8,8 +8,8 @@ class Spell:
         self.dmg = dmg
         self.type = type
 
-    def generate_spell_damage(self, spell, current_target):
-        mgl = spell['dmg'] - 5
-        mgh = spell['dmg'] + 5
+    def generate_spell_damage(self, current_target):
+        mgl = self.dmg - 5
+        mgh = self.dmg + 5
         damage = random.randrange(mgl, mgh)
         current_target.take_damage(damage)
