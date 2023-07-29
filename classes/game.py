@@ -1,5 +1,5 @@
 import random
-
+import pdb
 
 class bcolors:
     HEADER = '\033[95m'
@@ -27,28 +27,21 @@ class Person:
         self.current_target = None
         self.actions = [{'name' : 'Attack', 'function' : self.generate_damage},
                         {'name' : 'Magic', 'function' : self.choose_magic},
-                        {'name' : 'Change Target', 'function' : self.change_target},
                         {'name' : 'Run Away!', 'function' : self.flee}]
 
     def generate_damage(self):
-        if not self.current_target:
-            self.change_target(free_action=False)
+        self.change_target()
         damage = random.randrange(self.atkl, self.atkh)
         self.current_target.take_damage(damage)
 
     def cast_spell(self, spell):
+        self.change_target()
         if self.mp >= spell['cost']:
-            if not self.current_target:
-                self.change_target(free_action=False)
-            else:
-                self.generate_spell_damage(spell)
-                self.mp -= spell['cost']
-
-    def generate_spell_damage(self, spell):
-        mgl = spell['dmg'] - 5
-        mgh = spell['dmg'] + 5
-        damage = random.randrange(mgl, mgh)
-        self.current_target.take_damage(damage)
+            spell.generate_spell_damage(spell, self.current_target)
+            self.mp -= spell['cost']
+        else:
+            print(f'{bcolors.FAIL}Not enough magic points!{bcolors.ENDC}')
+            self.choose_action()
 
     def restore_health(self, spell):
         mgl = spell['dmg'] - 5
@@ -69,7 +62,7 @@ class Person:
     def reduce_mp(self, cost):
         self.mp -= cost
 
-    def choose_action(self, selection=None):
+    def choose_action(self, selection=None, target=None):
         options = {}
         [options.update({i+1 : {'name' : k['name'], 'function' : k['function']}}) for i, k in enumerate(self.actions)]
         if selection:
@@ -85,25 +78,30 @@ class Person:
             except Exception as e:
                 #log e
                 print('Invalid Selection, please try again...\n')
-                self.choose_action()
+                self.choose_action(target)
             else:
                 return options[selection]
 
-    def change_target(self, free_action=True):
+    def change_target(self, target=None):
+        if target:
+            self.current_target = target
+            return
         if len(self.targets) >= 1:
             options = {}
-            [options.update({i + 1: {'name': k.name, 'hp' : k.hp, 'object' : k}}) for i, k in enumerate(self.targets)]
+            try:
+                [options.update({i + 1: {'name': k.name, 'hp' : k.hp, 'object' : k}}) for i, k in enumerate(self.targets)]
+            except Exception as e:
+                print(e)
+                print('Error enumerating targets')
+                pdb.set_trace()
             [print(f'{i}. {k["name"]} - HP: {k["hp"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose a target: "))
             except Exception as e:
                 # log e
                 print('Invalid Selection, please try again...\n')
-                self.change_target(free_action=free_action)
             else:
                 self.current_target = options[selection]['object']
-                if free_action:
-                    self.choose_action()
         else:
             print('No other targets available')
 
@@ -117,8 +115,9 @@ class Person:
 
     def choose_magic(self):
         options = {}
-        [options.update({i+1 : {'name' : k['name'], 'cost' : k['cost'], 'dmg' : k['dmg']}}) for i, k in enumerate(self.magic)]
-        [print(f'{i}. {k["name"]}') for i, k in options.items()]
+        [options.update({i+1 : {'name' : k.name, 'cost' : k.cost, 'dmg' : k.dmg}}) for i, k in enumerate(self.magic)]
+        print(f'Current MP: {self.mp}')
+        [print(f'{i}. {k["name"]}, MP: {k["cost"]}') for i, k in options.items()]
         try:
             selection = int(input("Choose a spell: "))
         except Exception as e:
