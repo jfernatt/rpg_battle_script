@@ -3,12 +3,6 @@ import pdb
 from classes.magic import Spell
 
 def main():
-    magic = [{'name' : 'Fire', 'cost' : 10, 'dmg' : 10},
-             {'name' : 'Ice', 'cost' : 10, 'dmg' : 20},
-             {'name' : 'Wind', 'cost' : 10, 'dmg' : 30},
-             {'name' : 'Thunder', 'cost' : 10, 'dmg' : 40},
-             {'name' : 'Cure', 'cost' : 20, 'dmg' : 40}]
-
     player_magic = [Spell('Fire', 10, 100, 'harm'),
              Spell('Ice', 20, 200, 'harm'),
              Spell('Wind', 30, 300, 'harm'),
@@ -17,8 +11,8 @@ def main():
 
     player = Person(460, 15, 60, 34, player_magic, name = 'Player')
     party = [player]
-    enemy1 = Person(200, 65, 45, 25, magic, name = 'Enemy 1')
-    enemy2 = Person(18, 65, 45, 25, magic, name = 'Enemy 2')
+    enemy1 = Person(200, 65, 45, 25, player_magic, name = 'Enemy 1')
+    enemy2 = Person(18, 65, 45, 25, player_magic, name = 'Enemy 2')
     enemies = [enemy1, enemy2]
     player.targets = enemies
 
@@ -33,6 +27,7 @@ def main():
         print(f'{"=" * 72}')
 
         for enemy in enemies:
+            enemy.current_target = player
             if enemy.hp < 1:
                 print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
                 enemies.remove(enemy)
@@ -40,7 +35,7 @@ def main():
             print(f'{enemy.name}\'s Turn')
             echoice = enemy.choose_action(1, player)
             print(f'{enemy.name} chooses {echoice["name"]}\n')
-            echoice['function']()
+            echoice['function'](enemy.current_target)
             print(f'{"=" * 72}')
 
             if player.hp < 1:

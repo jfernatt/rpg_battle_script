@@ -1,6 +1,7 @@
 import random
 import pdb
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -29,8 +30,9 @@ class Person:
                         {'name' : 'Magic', 'function' : self.choose_magic},
                         {'name' : 'Run Away!', 'function' : self.flee}]
 
-    def generate_damage(self):
-        self.change_target()
+    def generate_damage(self, target=None):
+        if not target:
+            self.change_target()
         damage = random.randrange(self.atkl, self.atkh)
         self.current_target.take_damage(damage)
 
@@ -76,7 +78,7 @@ class Person:
             try:
                 selection = int(input("Choose an action: "))
             except Exception as e:
-                #log e
+                # log e
                 print('Invalid Selection, please try again...\n')
                 self.choose_action(target)
             else:
@@ -97,18 +99,18 @@ class Person:
             [print(f'{i}. {k["name"]} - HP: {k["hp"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose a target: "))
+                self.current_target = options[selection]['object']
             except Exception as e:
                 # log e
                 print('Invalid Selection, please try again...\n')
-            else:
-                self.current_target = options[selection]['object']
+                self.change_target()
         else:
             print('No other targets available')
 
     def flee(self):
         flee = random.randint(0, 1)
         if flee:
-            #Stop Combat
+            # Stop Combat
             quit()
         else:
             print(f'{bcolors.FAIL}{bcolors.BOLD}You were unable to flee from combat{bcolors.ENDC}')
