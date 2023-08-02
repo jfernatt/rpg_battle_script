@@ -31,6 +31,7 @@ def main():
             if enemy.hp < 1:
                 print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
                 enemies.remove(enemy)
+                continue
             enemy.targets = [player]
             print(f'{enemy.name}\'s Turn')
             echoice = enemy.choose_action(1, player)
