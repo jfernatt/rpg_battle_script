@@ -75,6 +75,30 @@ class Person:
     def reduce_mp(self, cost):
         self.mp -= cost
 
+    def create_status_bar(self):
+        total_str_len = (40 + 25 + 15 + 25)
+        print(f"{' ' * 40}{'_' * 25}{' ' * 15} {'_' * 25} ")
+        hp_txt = f'{self.hp}/{self.max_hp}|'
+        mp_txt = f'{self.mp}/{self.max_mp}|'
+        hp_bar_percent = self.hp / self.max_hp
+        if hp_bar_percent * 100 < 25:
+            hp_status_color = bcolors.FAIL
+        elif hp_bar_percent * 100  < 50:
+            hp_status_color = bcolors.WARNING
+        else:
+            hp_status_color = bcolors.OKGREEN
+        hp_bar_fill = b"\xdb".decode("cp437") * int((hp_bar_percent * 25))
+        hp_bar_empty = ' ' * (25 - len(hp_bar_fill))
+        hp_bar = f'{hp_status_color}{hp_bar_fill}{hp_bar_empty}' + bcolors.ENDC + '|'
+        lspace = 40 - len(self.name + hp_txt)
+        mspace = 15 - len(mp_txt)
+
+        mp_bar_percent = self.mp / self.max_mp
+        mp_bar_fill = b"\xdb".decode("cp437") * int((mp_bar_percent * 25))
+        mp_bar_empty = ' ' * (25 - len(mp_bar_fill))
+        mp_bar = f'{bcolors.OKBLUE}{mp_bar_fill}{mp_bar_empty}' + bcolors.ENDC + '|'
+        print(f"{self.name}{' ' * lspace}{hp_txt}{hp_bar}{' ' * mspace}{mp_txt}{mp_bar}{bcolors.ENDC}")
+
     def choose_action(self, selection=None, target=None):
         options = {}
         [options.update({i+1 : {'name' : k['name'], 'function' : k['function']}}) for i, k in enumerate(self.actions)]
@@ -85,8 +109,8 @@ class Person:
                 print(e)
                 quit()
         else:
-            print(f"{self.name}{' ' * 20}{self.hp}/{self.max_hp}{' ' * 20}{self.mp}/{self.max_mp}")
-            print(f'  HP:{self.hp}/{self.max_hp}\n  MP:{self.mp}/{self.max_mp}')
+            self.create_status_bar()
+            print('\n\n')
             [print(f'{i}. {k["name"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose an action: "))

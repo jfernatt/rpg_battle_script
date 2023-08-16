@@ -36,7 +36,6 @@ def main():
         print(f'{"=" * 72}')
         print('Player\'s Turn')
         print(f"NAME{' ' * 40}HP{' ' * 40}MP")
-        print(f"    {' ' * 40}{'_' * 25}  {' ' * 15} {'_' * 25} ")
         choice = player.choose_action()
         print(f'Player chooses {choice["name"]}\n')
         choice['function']()
