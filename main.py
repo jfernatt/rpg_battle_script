@@ -1,20 +1,34 @@
 from classes.game import Person, bcolors
 import pdb
 from classes.magic import Spell
+from classes.items import Item
+
+fire_spell = Spell('Fire', 10, 100, 'harm')
+ice_spell = Spell('Ice', 20, 200, 'harm')
+wind_spell = Spell('Wind', 30, 300, 'harm')
+thunder_spell = Spell('Thunder', 15, 150, 'harm')
+cure_spell = Spell('Cure', 40, 50, 'heal')
+
+potion = Item("Healing Potion", "potion", "A healing tincture in a small glass bottle. The taste is rather bitter. Heals for 40HP", "PLACEHOLDER", 'heal', 20, 5)
+grenade = Item("Grenade", "throwable", "Small hand grenade. Deals x damage", "PLACEHOLDER", 'physical', 40, 10)
 
 def main():
-    player_magic = [Spell('Fire', 10, 100, 'harm'),
-             Spell('Ice', 20, 200, 'harm'),
-             Spell('Wind', 30, 300, 'harm'),
-             Spell('Thunder', 15, 150, 'harm'),
-             Spell('Cure', 40, 50, 'heal')]
+    player_magic = [fire_spell,
+             ice_spell,
+             wind_spell,
+             thunder_spell,
+             cure_spell]
 
-    player = Person(460, 15, 60, 34, player_magic, name = 'Player')
+    player_inventory = [{'item' : potion, 'qty' : 5},
+                        {'item' : grenade, 'qty' : 5}]
+
+    player = Person(460, 45, 60, 34, player_magic, player_inventory, name = 'Player')
     party = [player]
+    player.targets = party
     enemy1 = Person(200, 65, 45, 25, player_magic, name = 'Enemy 1')
     enemy2 = Person(18, 65, 45, 25, player_magic, name = 'Enemy 2')
     enemies = [enemy1, enemy2]
-    player.targets = enemies
+    player.targets.extend(enemies)
 
     print(f'{bcolors.FAIL}{bcolors.BOLD}An Enemy Attacks!{bcolors.ENDC}')
     running = True

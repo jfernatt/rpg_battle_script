@@ -14,7 +14,7 @@ class bcolors:
 
 
 class Person:
-    def __init__(self, hp, mp, atk, df, magic, targets=None, name='Entity'):
+    def __init__(self, hp, mp, atk, df, magic, inventory=[], targets=None, name='Entity'):
         self.name = name
         self.max_hp = hp
         self.hp = hp
@@ -28,13 +28,15 @@ class Person:
         self.current_target = None
         self.actions = [{'name' : 'Attack', 'function' : self.generate_damage},
                         {'name' : 'Magic', 'function' : self.choose_magic},
+                        {'name' : 'Use Item', 'function' : self.choose_item},
                         {'name' : 'Run Away!', 'function' : self.flee}]
+        self.inventory = inventory
 
-    def generate_damage(self, target=None):
+    def generate_damage(self, target=None, type='physical'):
         if not target:
             self.change_target()
         damage = random.randrange(self.atkl, self.atkh)
-        self.current_target.take_damage(damage)
+        self.current_target.take_damage(damage, type)
 
     def cast_spell(self, spell):
         self.change_target()
@@ -45,6 +47,11 @@ class Person:
             print(f'{bcolors.FAIL}Not enough magic points!{bcolors.ENDC}')
             self.choose_action()
 
+    def use_item(self, item):
+        self.change_target()
+        item.enact_effect(self.current_target)
+        #REDUCE INVENTORY BY 1
+
     def restore_health(self, spell):
         mgl = spell['dmg'] - 5
         mgh = spell['dmg'] + 5
@@ -54,9 +61,13 @@ class Person:
         else:
             self.hp += convalescence
 
-    def take_damage(self, dmg):
-        print(f'{self.name} takes {dmg} points of damage...')
-        self.hp -= dmg
+    def take_damage(self, dmg, type):
+        if type in ['harm', 'physical']:
+            print(f'{bcolors.FAIL}{self.name} takes {dmg} points of {type} damage...{bcolors.ENDC}')
+            self.hp -= dmg
+        elif type == 'heal':
+            print(f'{bcolors.OKBLUE}{self.name} heals {dmg} points{bcolors.ENDC}')
+            self.hp += dmg
         if self.hp < 1:
             self.hp = 0
         return self.hp
@@ -74,6 +85,7 @@ class Person:
                 print(e)
                 quit()
         else:
+            print(f'  HP:{self.hp}/{self.max_hp}\n  MP:{self.mp}/{self.max_mp}')
             [print(f'{i}. {k["name"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose an action: "))
@@ -127,3 +139,18 @@ class Person:
             # log e
             print('Invalid Selection, please try again...\n')
             self.choose_magic()
+
+    def choose_item(self):
+        options = {}
+        [options.update({i+1 : {'name' : k['item'].name, 'description' : k['item'].description, 'qty' : k['qty'], 'object' : k['item']}}) for i, k in enumerate(self.inventory) if k['qty'] > 0]
+        [print(f'{i}. {k["name"]}, Qty: {k["qty"]}\n  Description: {k["description"]}, ') for i, k in options.items()]
+        try:
+            selection = int(input("Choose an item to use: "))
+            self.use_item(options[selection]['object'])
+            reduce_inv = [i for i in self.inventory if options[selection]['object'] is i['item']]
+            reduce_inv[0]['qty'] -= 1
+        except Exception as e:
+            # log e
+            pdb.set_trace()
+            print('Invalid Selection, please try again...\n')
+            self.choose_item()

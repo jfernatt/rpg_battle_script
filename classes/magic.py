@@ -12,4 +12,4 @@ class Spell:
         mgl = self.dmg - 5
         mgh = self.dmg + 5
         damage = random.randrange(mgl, mgh)
-        current_target.take_damage(damage)
+        current_target.take_damage(damage, type=self.type)
