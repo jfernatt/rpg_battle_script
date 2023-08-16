@@ -109,9 +109,7 @@ class Person:
                 print(e)
                 quit()
         else:
-            self.create_status_bar()
-            print('\n\n')
-            [print(f'{i}. {k["name"]}') for i, k in options.items()]
+            [print(f' {i}. {k["name"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose an action: "))
             except Exception as e:
@@ -147,7 +145,6 @@ class Person:
     def flee(self):
         flee = random.randint(0, 1)
         if flee:
-            # Stop Combat
             quit()
         else:
             print(f'{bcolors.FAIL}{bcolors.BOLD}You were unable to flee from combat{bcolors.ENDC}')

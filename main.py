@@ -22,31 +22,44 @@ def main():
     player_inventory = [{'item' : potion, 'qty' : 5},
                         {'item' : grenade, 'qty' : 5}]
 
-    player = Person(460, 45, 60, 34, player_magic, player_inventory, name = 'Player')
-    party = [player]
-    player.targets = party
+    player1 = Person(460, 45, 60, 34, player_magic, player_inventory, name = 'Doofy')
+    player2 = Person(200, 80, 15, 14, player_magic, player_inventory, name="Floofy")
+    party = [player1, player2]
+    player_targets = [i for i in party]
     enemy1 = Person(200, 65, 45, 25, player_magic, name = 'Enemy 1')
     enemy2 = Person(18, 65, 45, 25, player_magic, name = 'Enemy 2')
     enemies = [enemy1, enemy2]
-    player.targets.extend(enemies)
-
+    player_targets.extend(enemies)
     print(f'{bcolors.FAIL}{bcolors.BOLD}An Enemy Attacks!{bcolors.ENDC}')
+
+    for player in party:
+        player.targets = player_targets
+
     running = True
     while running:
-        print(f'{"=" * 72}')
-        print('Player\'s Turn')
         print(f"NAME{' ' * 40}HP{' ' * 40}MP")
-        choice = player.choose_action()
-        print(f'Player chooses {choice["name"]}\n')
-        choice['function']()
-        print(f'{"=" * 72}')
-
+        for player in party:
+            for player in party:
+                player.create_status_bar()
+            for enemy in enemies:
+                enemy.create_status_bar()
+            print(f'{"=" * 72}')
+            print(f'{player.name}\'s Turn')
+            choice = player.choose_action()
+            print(f'Player chooses {choice["name"]}\n')
+            choice['function']()
+            print(f'{"=" * 72}')
+            for enemy in enemies:
+                if enemy.hp < 1:
+                    print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
+                    enemies.remove(enemy)
+                    if len(enemies) < 1:
+                        running = False
+                        print('You win!')
+                        quit()
+                    continue
         for enemy in enemies:
             enemy.current_target = player
-            if enemy.hp < 1:
-                print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
-                enemies.remove(enemy)
-                continue
             enemy.targets = [player]
             print(f'{enemy.name}\'s Turn')
             echoice = enemy.choose_action(1, player)
@@ -57,11 +70,6 @@ def main():
             if player.hp < 1:
                 print(f'{bcolors.FAIL}{player.name} has been defeated!{bcolors.ENDC}')
                 running = False
-
-        if len(enemies) < 1:
-            running = False
-            print('You win!')
-
     print("Thanks for playing!")
 
 
