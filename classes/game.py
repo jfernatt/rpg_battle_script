@@ -85,6 +85,7 @@ class Person:
                 print(e)
                 quit()
         else:
+            print(f"{self.name}{' ' * 20}{self.hp}/{self.max_hp}{' ' * 20}{self.mp}/{self.max_mp}")
             print(f'  HP:{self.hp}/{self.max_hp}\n  MP:{self.mp}/{self.max_mp}')
             [print(f'{i}. {k["name"]}') for i, k in options.items()]
             try:
