@@ -1,5 +1,4 @@
 import random
-import pdb
 
 
 class bcolors:
@@ -32,11 +31,11 @@ class Person:
                         {'name' : 'Run Away!', 'function' : self.flee}]
         self.inventory = inventory
 
-    def generate_damage(self, target=None, type='physical'):
+    def generate_damage(self, target=None, dmg_type='physical'):
         if not target:
             self.change_target()
         damage = random.randrange(self.atkl, self.atkh)
-        self.current_target.take_damage(damage, type)
+        self.current_target.take_damage(damage, dmg_type)
 
     def cast_spell(self, spell):
         self.change_target()
@@ -50,7 +49,6 @@ class Person:
     def use_item(self, item):
         self.change_target()
         item.enact_effect(self.current_target)
-        #REDUCE INVENTORY BY 1
 
     def restore_health(self, spell):
         mgl = spell['dmg'] - 5
@@ -61,11 +59,11 @@ class Person:
         else:
             self.hp += convalescence
 
-    def take_damage(self, dmg, type):
-        if type in ['harm', 'physical']:
-            print(f'{bcolors.FAIL}{self.name} takes {dmg} points of {type} damage...{bcolors.ENDC}')
+    def take_damage(self, dmg, dmg_type):
+        if dmg_type in ['harm', 'physical']:
+            print(f'{bcolors.FAIL}{self.name} takes {dmg} points of {dmg_type} damage...{bcolors.ENDC}')
             self.hp -= dmg
-        elif type == 'heal':
+        elif dmg_type == 'heal':
             print(f'{bcolors.OKBLUE}{self.name} heals {dmg} points{bcolors.ENDC}')
             self.hp += dmg
         if self.hp < 1:
@@ -76,14 +74,13 @@ class Person:
         self.mp -= cost
 
     def create_status_bar(self):
-        total_str_len = (40 + 25 + 15 + 25)
         print(f"{' ' * 40}{'_' * 25}{' ' * 15} {'_' * 25} ")
         hp_txt = f'{self.hp}/{self.max_hp}|'
         mp_txt = f'{self.mp}/{self.max_mp}|'
         hp_bar_percent = self.hp / self.max_hp
         if hp_bar_percent * 100 < 25:
             hp_status_color = bcolors.FAIL
-        elif hp_bar_percent * 100  < 50:
+        elif hp_bar_percent * 100 < 50:
             hp_status_color = bcolors.WARNING
         else:
             hp_status_color = bcolors.OKGREEN
@@ -105,19 +102,17 @@ class Person:
         if selection:
             try:
                 return options[selection]
-            except Exception as e:
-                print(e)
+            except Exception:
                 quit()
         else:
             [print(f' {i}. {k["name"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose an action: "))
-            except Exception as e:
-                # log e
-                print('Invalid Selection, please try again...\n')
-                self.choose_action(target)
-            else:
                 return options[selection]
+            except Exception:
+                print('Invalid Action Selection, please try again...\n')
+                self.choose_action(target)
+
 
     def change_target(self, target=None):
         if target:
@@ -128,23 +123,20 @@ class Person:
             try:
                 [options.update({i + 1: {'name': k.name, 'hp' : k.hp, 'object' : k}}) for i, k in enumerate(self.targets)]
             except Exception as e:
-                print(e)
                 print('Error enumerating targets')
-                pdb.set_trace()
             [print(f'{i}. {k["name"]} - HP: {k["hp"]}') for i, k in options.items()]
             try:
                 selection = int(input("Choose a target: "))
                 self.current_target = options[selection]['object']
-            except Exception as e:
-                # log e
-                print('Invalid Selection, please try again...\n')
+            except Exception:
+                print('Invalid Target Selection, please try again...\n')
                 self.change_target()
         else:
             print('No other targets available')
 
     def flee(self):
-        flee = random.randint(0, 1)
-        if flee:
+        fleeing = random.randint(0, 1)
+        if fleeing:
             quit()
         else:
             print(f'{bcolors.FAIL}{bcolors.BOLD}You were unable to flee from combat{bcolors.ENDC}')
@@ -157,9 +149,8 @@ class Person:
         try:
             selection = int(input("Choose a spell: "))
             self.cast_spell(options[selection]['object'])
-        except Exception as e:
-            # log e
-            print('Invalid Selection, please try again...\n')
+        except Exception:
+            print('Invalid Magic Selection, please try again...\n')
             self.choose_magic()
 
     def choose_item(self):
@@ -171,8 +162,7 @@ class Person:
             self.use_item(options[selection]['object'])
             reduce_inv = [i for i in self.inventory if options[selection]['object'] is i['item']]
             reduce_inv[0]['qty'] -= 1
-        except Exception as e:
+        except Exception:
             # log e
-            pdb.set_trace()
             print('Invalid Selection, please try again...\n')
             self.choose_item()

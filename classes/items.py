@@ -1,5 +1,5 @@
 import random
-import pdb
+
 
 class Item:
     def __init__(self, name, item_type, description, prop, effect_type, base_effect, magnitude=0):
@@ -15,6 +15,4 @@ class Item:
         e_low = self.base_effect - self.magnitude
         e_high = self.base_effect + self.magnitude
         final_effect = random.randrange(e_low, e_high)
-        print(f'EFFECT {final_effect}')
         target.take_damage(final_effect, self.effect_type)
-
