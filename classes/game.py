@@ -111,7 +111,7 @@ class Person:
                 return options[selection]
             except Exception:
                 print('Invalid Action Selection, please try again...\n')
-                self.choose_action(target)
+                return self.choose_action()
 
 
     def change_target(self, target=None):

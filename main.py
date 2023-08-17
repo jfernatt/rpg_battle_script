@@ -65,18 +65,19 @@ def main():
     while running:
         print(f"NAME{' ' * 40}HP{' ' * 40}MP")
         for player in party:
-            make_status_bar(party, enemies)
-            print(f'{"=" * 72}')
-            print(f'{player.name}\'s Turn')
-            choice = player.choose_action()
-            print(f'Player chooses {choice["name"]}\n')
-            choice['function']()
-            print(f'{"=" * 72}')
-            for enemy in enemies:
-                if enemy.hp < 1:
-                    print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
-                    enemies.remove(enemy)
-                    running = check_end_conditions(party, enemies)
+            if player.hp > 0:
+                make_status_bar(party, enemies)
+                print(f'{"=" * 72}')
+                print(f'{player.name}\'s Turn')
+                choice = player.choose_action()
+                print(f'Player chooses {choice["name"]}\n')
+                choice['function']()
+                print(f'{"=" * 72}')
+                for enemy in enemies:
+                    if enemy.hp < 1:
+                        print(f'{bcolors.OKGREEN}{enemy.name} has been defeated!{bcolors.ENDC}')
+                        enemies.remove(enemy)
+                        running = check_end_conditions(party, enemies)
         for enemy in enemies:
             enemy.current_target = party[0]
             enemy.targets = party
@@ -91,6 +92,7 @@ def main():
                 running = False
                 for target in enemy.targets:
                     if target.hp < 1:
+                        enemy.targets.remove(target)
                         running = check_end_conditions(party, enemies)
         if not running:
             print(f'{bcolors.OKGREEN}Your party has defeated the enemies!{bcolors.ENDC}')
